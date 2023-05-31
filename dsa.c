@@ -43,7 +43,7 @@ int find_index(int item, miningTable miningCounter[], int miningCount)
 }
 void sortDesc(itemsTable itemsCounter[10000], int last_index)
 {
-                // Sorts the entries in itemsCounter in descending order.
+        // Sorts the entries in itemsCounter in descending order.
 
         int i, j;
         itemsTable temp;
@@ -64,7 +64,7 @@ void sortDesc(itemsTable itemsCounter[10000], int last_index)
 
 void supportFilter(itemsTable itemsCounter[10000], int *item_count)
 {
-                // Discards items from itemsCounter having frquency less than the support count.
+        // Discards items from itemsCounter having frquency less than the support count.
 
         int last_index = *item_count;
         int supportCount = SUPPORT;
@@ -90,17 +90,17 @@ void supportFilter(itemsTable itemsCounter[10000], int *item_count)
 void displayItems(itemsTable itemsCounter[], int item_count)
 {
 
-                // display items in items counter along with frequenies.
+        // display items in items counter along with frequenies.
 
         for (int j = 0; j <= item_count; j++)
         {
-                printf("**** %d  - %s -  %d *******\n", j, itemsCounter[j].item, itemsCounter[j].count);
+                printf("%d  - %s \n", j + 1, itemsCounter[j].item);
         }
 }
-void orderTransaction(char *transaction_data, itemsTable itemsCounter[], order table[], int order_row, int item_count)
+void orderTransaction(char *transaction_data, itemsTable itemsCounter[], order table[], int order_row, int item_count, char items[][100])
 {
 
-                // Orders transaction according to decreasing order of frequencies.
+        // Orders transaction according to decreasing order of frequencies.
 
         char *data_item = (char *)malloc(1000 * sizeof(char));
 
@@ -124,6 +124,7 @@ void orderTransaction(char *transaction_data, itemsTable itemsCounter[], order t
                                 if (strcmp(data_item, itemsCounter[i].item) == 0)
                                 {
                                         table[order_row].array[table[order_row].len++] = i;
+                                        strcpy(items[i], data_item);
                                         found = TRUE;
                                 }
                                 free(data_item);
@@ -135,11 +136,10 @@ void orderTransaction(char *transaction_data, itemsTable itemsCounter[], order t
                 }
         }
 }
-int orderTable(itemsTable itemsCounter[10000], order table[10000], int item_count)
+int orderTable(itemsTable itemsCounter[10000], order table[10000], int item_count, char items[][100])
 {
-         
-                // Orders table of transactions using orderTransaction function
-         
+
+        // Orders table of transactions using orderTransaction function
 
         // displayItems(itemsCounter, item_count);
 
@@ -179,7 +179,7 @@ int orderTable(itemsTable itemsCounter[10000], order table[10000], int item_coun
                                 order_row++;
                                 if (totalTrans > 1)
                                 {
-                                        orderTransaction(transaction_data, itemsCounter, table, order_row - 1, item_count);
+                                        orderTransaction(transaction_data, itemsCounter, table, order_row - 1, item_count, items);
                                         free(transaction_data);
                                         transaction_data = NULL;
                                         transaction_data = (char *)malloc(10000 * sizeof(char));
@@ -206,7 +206,7 @@ int orderTable(itemsTable itemsCounter[10000], order table[10000], int item_coun
                 prev_ch = ch;
         }
 
-        orderTransaction(transaction_data, itemsCounter, table, order_row, item_count);
+        orderTransaction(transaction_data, itemsCounter, table, order_row, item_count, items);
         free(transaction_data);
         transaction_data = NULL;
 
@@ -215,9 +215,9 @@ int orderTable(itemsTable itemsCounter[10000], order table[10000], int item_coun
 }
 void constructBaseFPtree(itemsTable itemsCounter[], order table[], int row_count)
 {
-         
-                // constructs initial FP tree based on transactions from the file.
-         
+
+        // constructs initial FP tree based on transactions from the file.
+
         node *parent, *root, *current, *level_traverse;
         // phase 1
         root = (node *)malloc(sizeof(node));
@@ -281,9 +281,9 @@ void constructBaseFPtree(itemsTable itemsCounter[], order table[], int row_count
 }
 void constructFPtree(miningTable miningCounter[], int miningCount, order table[], int row_count)
 {
-         
-                // Construct FP tree.
-         
+
+        // Construct FP tree.
+
         node *parent, *root, *current, *level_traverse;
         // phase 1
         root = (node *)malloc(sizeof(node));
@@ -347,15 +347,15 @@ void constructFPtree(miningTable miningCounter[], int miningCount, order table[]
                 }
         }
 }
-void print_tree(itemsTable itemsCounter[], int item_count)
+void print_tree(itemsTable itemsCounter[], order table[], int item_count, char items[][100])
 {
-         
-                // prints FP tree
-         
+
+        // prints FP tree
+
         node *current_node, *current_sibling;
         for (int i = 0; i <= item_count; ++i)
         {
-                printf("item: %d count: %d item_sets: ", i, itemsCounter[i].count);
+                printf("item: %s count: %d item_sets: ", items[i], itemsCounter[i].count);
                 current_sibling = itemsCounter[i].reference;
 
                 int k = 0;
@@ -366,7 +366,8 @@ void print_tree(itemsTable itemsCounter[], int item_count)
                         printf("\n");
                         while (current_node->parent != NULL)
                         {
-                                printf("%d ", current_node->item);
+                                // printf("%d ", current_node->item);
+                                printf("%s ", items[current_node->item]);
                                 current_node = current_node->parent;
                         }
                         current_sibling = current_sibling->sibling;
@@ -378,9 +379,9 @@ void print_tree(itemsTable itemsCounter[], int item_count)
 
 void copyToMiningTable(itemsTable itemsCounter[], miningTable miningCounter[], int item_count)
 {
-         
-                // Copies contents of itemsCounter to mining Counter except the item string.
-         
+
+        // Copies contents of itemsCounter to mining Counter except the item string.
+
         for (int i = 0; i <= item_count; ++i)
         {
                 initialize_mining_table(&miningCounter[i]);
@@ -390,11 +391,12 @@ void copyToMiningTable(itemsTable itemsCounter[], miningTable miningCounter[], i
                 miningCounter[i].reference = itemsCounter[i].reference;
         }
 }
+
 void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int old_miningCount, order old_table[], int old_row_count, int prefix[])
 {
-         
-                // Recursive function for mining FP tree.
-         
+
+        // Recursive function for mining FP tree.
+
         if (old_miningCount < 0)
         {
                 // printf("\n--------------------- end ---------------------\n");
@@ -424,7 +426,7 @@ void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int 
                 int item = old_miningCounter[i].item;
                 int item_total_count = old_miningCounter[i].count;
 
-                printf("main item: %d\n", item);
+                // printf("main item: %d\n", item);
                 // printf("prefix: \n");
                 for (int j = 0; j < last_index; ++j)
                 {
@@ -437,9 +439,7 @@ void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int 
 
                 // printf("Itemscounter:%s\n",itemsCounter[item].item);
                 // printf("Prefix_string:{%s}\n",prefix_string);
-                if(prefix_string[0]<='z' && prefix_string[0]>='a'){
-                printf("transaction:: {%s%s}:%d\n", prefix_string, itemsCounter[item].item, old_miningCounter[i].count);
-                }
+                // printf("transaction:: {%s%s}:%d\n", prefix_string, itemsCounter[item].item, old_miningCounter[i].count);
                 // printf("transaction:: {%s}:%d\n", itemsCounter[item].item, old_miningCounter[i].count);
 
                 node *current_node, *current_sibling;
@@ -535,102 +535,201 @@ void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int 
                 constructFPtree(miningCounter, miningCount, table, row_count);
 
                 mineFPtree(itemsCounter, miningCounter, miningCount, table, row_count, new_prefix);
-
-        } // conditional mining
-}
-
-void printTopItems(itemsTable itemsCounter[], int item_count) {
-
-    // Sort the itemsCounter array in descending order based on count
-
-    sortDesc(itemsCounter, item_count);
-
-    printf("Top Selling Items:\n");
-    int count = 0;
-    for (int i = 0; i < item_count; ++i) {
-        if (itemsCounter[i].count > 0) {
-            printf("%s \n", itemsCounter[i].item);
-            count++;
-            if (count == 10) {
-                break;
-            }
         }
-    }
 }
 
-// void recommendItems(char* cart[], int cartSize, itemsTable itemsCounter[], int last_index) {
-//     printf("Recommended Items:\n");
+void printTopItems(itemsTable itemsCounter[], int item_count)
+{
+
+        // Sort the itemsCounter array in descending order based on count
+
+        sortDesc(itemsCounter, item_count);
+
+        printf("Top Selling Items:\n");
+        int count = 0;
+        for (int i = 0; i < item_count; ++i)
+        {
+                if (itemsCounter[i].count > 0)
+                {
+                        printf("%s \n", itemsCounter[i].item);
+                        count++;
+                        if (count == 10)
+                        {
+                                break;
+                        }
+                }
+        }
+}
+
+// void recommendItems(char* cart[], int cartSize, itemsTable itemsCounter[], int last_index, char items[][100]) {
+
+//     if (cartSize==0){
+//         printf("Cart is Empty");
+//     }
+//     // Iterate over the items in the cart
 //     for (int i = 0; i < cartSize; i++) {
-//         char* item = cart[i];
-//         for (int j = 0; j < last_index; j++) {
-//             if (strcmp(itemsCounter[j].item, item) == 0) {
-//                 // Find the item with the highest count that occurs with 'item'
-//                 int maxCount = -1;
-//                 char* recommendedItem = NULL;
-//                 for (int k = 0; k < last_index; k++) {
-//                     if (k != j && itemsCounter[k].count > maxCount) {
-//                         // Check if itemsCounter[k] occurs with 'item'
-//                         int count = 0;
-//                         node* reference = itemsCounter[k].reference;
-//                         while (reference != NULL) {
-//                             if (reference->parent != NULL && strcmp(itemsCounter[reference->parent->itemIndex].item, item) == 0) {
-//                                 count++;
-//                             }
-//                             reference = reference->sibling;
-//                         }
-//                         if (count > maxCount) {
-//                             maxCount = count;
-//                             recommendedItem = itemsCounter[k].item;
-//                         }
-//                     }
-//                 }
-//                 if (recommendedItem != NULL) {
-//                     printf("%s\n", recommendedItem);
-//                 }
-//             }
+//         // Get the item index from itemsCounter
+//         // int itemIndex = findItemIndex(cart[i], itemsCounter, last_index);
+
+//         if (itemIndex != -1) {
+//             // Get the reference node of the item in the FP tree
+//             node* referenceNode = itemsCounter[itemIndex].reference;
+
+//             // Print the recommendations
+//             printf("Recommendations for %s: ", cart[i]);
+//             traverseChildNodes(referenceNode, itemsCounter, last_index,items);
+//             printf("\n");
 //         }
 //     }
 // }
 
+// void traverseChildNodes(node* parent, itemsTable itemsCounter[], int last_index, char items[][100]) {
+//     node* current = parent->child;
 
+//     // Traverse all child nodes
+//     while (current != NULL) {
+//         // Get the item name from itemsCounter
+//         // char* itemName = itemsCounter[current->item].item;
+//         char* itemName = items[current->item];
 
+//         // Print the item name
+//         printf("%s ", itemName);
 
-void addToCart(char* item, char* cart[], int* cartSize) {
-    if (*cartSize >= MAX_CART_SIZE) {
-        printf("Cart is full. Remove an item before adding more.\n");
-        return;
-    }
+//         // Recursively traverse child nodes of the current node
+//         traverseChildNodes(current, itemsCounter, last_index, items);
 
-    cart[*cartSize] = item;
-    (*cartSize)++;
-    printf("%s added to the cart.\n", item);
+//         current = current->sibling;
+//     }
+// }
+
+void displayCart(int cart[], int cartSize, char items[][100])
+{
+        if (cartSize == 0)
+        {
+                printf("Cart is Empty");
+                return;
+        }
+        printf("Cart items:\n");
+        for (int i = 0; i < cartSize; i++)
+        {
+                printf("%d - %s\n", cart[i], items[cart[i]]);
+        }
 }
 
-void removeFromCart(char* item, char* cart[], int* cartSize) {
-    int found = 0;
-    for (int i = 0; i < *cartSize; i++) {
-        if (strcmp(cart[i], item) == 0) {
-            found = 1;
-            // Shift the remaining items in the cart
-            for (int j = i; j < *cartSize - 1; j++) {
-                cart[j] = cart[j + 1];
-            }
-            (*cartSize)--;
-            break;
+void addToCart(int item, int cart[], int *cartSize, char items[][100])
+{
+        if (*cartSize >= MAX_CART_SIZE)
+        {
+                printf("Cart is full. Remove an item before adding more.\n");
+                return;
         }
-    }
 
-    if (found) {
-        printf("%s removed from the cart.\n", item);
-    } else {
-        printf("%s is not in the cart.\n", item);
-    }
+        cart[*cartSize] = item;
+        (*cartSize)++;
+        printf("%s added to the cart.\n", items[item]);
+}
+
+void removeFromCart(int item, int cart[], int *cartSize, char items[][100])
+{
+        int found = 0;
+        for (int i = 0; i < *cartSize; i++)
+        {
+                // if (strcmp(cart[items[i]], item) == 0) {
+                if (strcmp(items[cart[i]], items[item]) == 0)
+                {
+                        found = 1;
+                        // Shift the remaining items in the cart
+                        for (int j = i; j < *cartSize - 1; j++)
+                        {
+                                cart[j] = cart[j + 1];
+                        }
+                        (*cartSize)--;
+                        break;
+                }
+        }
+
+        if (found)
+        {
+                printf("%s removed from the cart.\n", items[item]);
+        }
+        else
+        {
+                printf("%s is not in the cart.\n", items[item]);
+        }
+}
+
+void displayOrderTable(order table[], int row_count, char items[][100])
+{
+        printf("Order Table:\n");
+
+        for (int i = 0; i < row_count; ++i)
+        {
+                printf("Row %d:\n", i + 1);
+                printf("Count: %d\n", table[i].count);
+                printf("Items: ");
+                for (int j = 0; j < table[i].len; ++j)
+                {
+                        printf("%s ", items[table[i].array[j]]);
+                }
+                printf("\n-----------------------\n");
+        }
+}
+
+void displayMiningTable(miningTable miningCounter[], int miningCount, itemsTable itemsCounter[], char items[][100])
+{
+        printf("Mining Table:\n");
+        for (int i = 0; i <= miningCount; ++i)
+        {
+                int item = miningCounter[i].item;
+                printf("Item: %s\n", itemsCounter[item].item);
+                printf("Count: %d\n", miningCounter[i].count);
+                // printf("Reference: %p\n", miningCounter[i].reference);
+                // printf("Last Sibling: %s\n", items[miningCounter[i].last_sibling->child->item]);
+                printf("-----------------------\n");
+        }
+}
+
+void implementaionMenu(itemsTable itemsCounter[], order table[],miningTable miningCounter[], int item_count, int row_count, char items[][100])
+{
+        while (1)
+        {
+                int option;
+                printf("\nData Structures Used:\n");
+                printf("1. Display FP Tree\n");
+                printf("2. Display Order Table\n");
+                printf("3. Display Mining Table\n");
+                printf("4. Exit\n");
+                printf("Enter your option: ");
+                scanf("%d", &option);
+
+                switch (option)
+                {
+                case 1:
+                        printf("Displaying FP Tree:\n");
+                        print_tree(itemsCounter,table, item_count,items);
+                        break;
+                case 2:
+                        printf("Displaying Order Table:\n");
+                        displayOrderTable(table, row_count, items);
+                        break;
+                case 3:
+                        printf("Displaying Mining Table:\n");
+                        displayMiningTable(miningCounter, item_count, itemsCounter, items);
+                        break;
+                case 4:
+                        printf("\n");
+                        return;
+                default:
+                        printf("Invalid option\n");
+                        break;
+                }
+        }
 }
 
 int processFile(FILE *stream, itemsTable itemsCounter[], int *last_index)
 {
 
-                // Processes the file and stores the items in itemsCounter.
+        // Processes the file and stores the items in itemsCounter.
 
         char ch;
         char *data_item = (char *)malloc(1000 * sizeof(char));
