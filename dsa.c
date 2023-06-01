@@ -44,44 +44,50 @@ Map initMap(int capacity)
 // Function to insert a key-value pair into the map
 void insert(Map *map, int key, const char *value)
 {
-
-        // Check if the key already exists in the map
-        for (int i = 0; i < map->size; i++)
+    // Check if the key already exists in the map
+    for (int i = 0; i < map->size; i++)
+    {
+        KeyValuePair *pair = &(map->data[i]);
+        if (pair->key == key)
         {
-                KeyValuePair *pair = &(map->data[i]);
-                if (pair->key == key)
-                {
-                        // Key already exists, concatenate the new value
-                        size_t newLength = strlen(pair->value) + strlen(value) + 3;
-                        char *newValue = (char *)malloc(newLength * sizeof(char));
-                        strcpy(newValue, pair->value);
-                        strcat(newValue, " , ");
-                        strcat(newValue, value);
-                        free(pair->value);
-                        pair->value = newValue;
-                        // printf("Inserted%s\n", pair->value);
-                        return;
-                }
+            // Key already exists, check if the new token is a substring of the old token
+            if (strstr(pair->value, value) != NULL)
+            {
+                // New token already exists in the old token, no need to concatenate
+                return;
+            }
+
+            // Key already exists, concatenate the new value
+            size_t newLength = strlen(pair->value) + strlen(value) + 4;
+            char *newValue = (char *)malloc(newLength * sizeof(char));
+            strcpy(newValue, pair->value);
+            strcat(newValue, " , ");
+            strcat(newValue, value);
+            free(pair->value);
+            pair->value = newValue;
+        //     printf("Inserted: %s\n", pair->value);
+            return;
         }
+    }
 
-        // Key does not exist, create a new key-value pair
-        KeyValuePair *pair = &(map->data[map->size]);
-        pair->key = key;
-        pair->value = (char *)malloc((strlen(value) + 1) * sizeof(char));
-        strcpy(pair->value, value);
-        // printf("Inserted%s\n", pair->value);
+    // Key does not exist, create a new key-value pair
+    KeyValuePair *pair = &(map->data[map->size]);
+    pair->key = key;
+    pair->value = (char *)malloc((strlen(value) + 1) * sizeof(char));
+    strcpy(pair->value, value);
 
-        map->size++;
+    map->size++;
 }
+
 
 char *get(Map *map, int key)
 {
         for (int i = 0; i < map->size; i++)
         {
-                KeyValuePair *pair = &(map->data[i]);
-                if (pair->key == key)
+                KeyValuePair pair = (map->data[i]);
+                if (pair.key == key)
                 {
-                        return pair->value;
+                        return pair.value;
                 }
         }
 
@@ -461,7 +467,7 @@ int findItemIndex(char items[][100], char *item)
         }
 }
 
-void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int old_miningCount, order old_table[], int old_row_count, int prefix[], char items[][100], Map pairs)
+void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int old_miningCount, order old_table[], int old_row_count, int prefix[], char items[][100], Map *pairs)
 {
 
         // Recursive function for mining FP tree.
@@ -473,6 +479,7 @@ void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int 
         }
         char prefix_string[1000] = "\0";
         int last_index = 0;
+        insert(pairs, 0, "rolls");
         // printf("%d",prefix[last_index]);
         while (prefix[last_index] != -1)
         {
@@ -511,9 +518,11 @@ void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int 
                 if (prefix_string[0] != '\0')
                 {
                         char *token = strtok(prefix_string, ",");
-                        printf("%s  %s\n", token, itemsCounter[item].item);
+                        // printf("%s  %s\n", token, itemsCounter[item].item);
                         int itemIndex = findItemIndex(items, token);
-                        insert(&pairs, itemIndex, itemsCounter[item].item);
+                        // printf("itemIndex:%d%s\n", itemIndex, items[item]);
+                        insert(pairs, itemIndex, itemsCounter[item].item);
+                        // insert(&pairs, itemIndex, items[item]);
                         // while(token!=NULL)
                         // token=strtok(NULL,",");
                         // insert(&pairs, itemIndex, token);
@@ -660,7 +669,8 @@ void recommendItems(int cart[], int cartSize, char items[][100], Map pairs)
         for (int i = 0; i < cartSize; i++)
         {
                 char *rec = get(&pairs, cart[i]);
-                printf("%d.%s  ", i + 1, rec);
+                if(rec!=NULL)
+                printf("%d.%s=>  %s  \n",i+1,items[i],rec);
         }
 }
 
@@ -770,7 +780,7 @@ void displayMiningTable(miningTable miningCounter[], int miningCount, itemsTable
         }
 }
 
-void implementaionMenu(itemsTable itemsCounter[], order table[], miningTable miningCounter[], int item_count, int row_count, char items[][100])
+void implementaionMenu(itemsTable itemsCounter[], order table[], miningTable miningCounter[], int item_count, int row_count, char items[][100],Map* pairs)
 {
         while (1)
         {
@@ -779,7 +789,8 @@ void implementaionMenu(itemsTable itemsCounter[], order table[], miningTable min
                 printf("1. Display FP Tree\n");
                 printf("2. Display Order Table\n");
                 printf("3. Display Mining Table\n");
-                printf("4. Exit\n");
+                printf("4. Recommendation Map\n");
+                printf("5. Exit\n");
                 printf("Enter your option: ");
                 scanf("%d", &option);
 
@@ -798,6 +809,17 @@ void implementaionMenu(itemsTable itemsCounter[], order table[], miningTable min
                         displayMiningTable(miningCounter, item_count, itemsCounter, items);
                         break;
                 case 4:
+                        printf("Displaying Recommendation Map:\n");
+                        for (int i = 0; i < 100; i++)
+                        {
+                                char *rec = get(pairs, i);
+                                if (rec != NULL)
+                                {
+                                        printf("%s =>  %s  \n", items[i], rec);
+                                }
+                        }
+                        break;
+                case 5:
                         printf("\n");
                         return;
                 default:

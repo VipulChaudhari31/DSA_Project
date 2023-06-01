@@ -52,19 +52,14 @@ int main()
 
         int prefix[10000];
         prefix[0] = -1;
-        mineFPtree(itemsCounter, miningCounter, last_index, table, row_count, prefix,items,pairs);
+        mineFPtree(itemsCounter, miningCounter, last_index, table, row_count, prefix,items,&pairs);
 
         //     printf("Last:%d",last_index);
         //     print_tree(itemsCounter,table, last_index,items);
         // printf("Items:\n");
         
         // int size=sizeof(table)
-
-        for (int i = 0; i < 10; i++)
-        {
-                char *rec = get(&pairs, i);
-                printf("%d.%s  ", i + 1, rec);
-        }
+        
 
         int choice;
         do
@@ -114,7 +109,7 @@ int main()
                         break;
                 case 7:
                 
-                        implementaionMenu(itemsCounter,table,miningCounter,last_index,row_count,items);
+                        implementaionMenu(itemsCounter,table,miningCounter,last_index,row_count,items,&pairs);
                         printf("\n");
                         break;             
 

@@ -75,7 +75,7 @@ void constructBaseFPtree(itemsTable itemsCounter[], order table[], int row_count
 void constructFPtree(miningTable miningCounter[], int miningCount, order table[], int row_count);
 void print_tree(itemsTable itemsCounter[],order table[], int item_count,char items[][100]);
 void copyToMiningTable(itemsTable itemsCounter[], miningTable miningCounter[], int item_count);
-void mineFPtree(itemsTable itemsCounter[],miningTable old_miningCounter[],int old_miningCount,order old_table[],int old_row_count,int prefix[],char items[][100],Map pairs);
+void mineFPtree(itemsTable itemsCounter[],miningTable old_miningCounter[],int old_miningCount,order old_table[],int old_row_count,int prefix[],char items[][100],Map* pairs);
 void displayTopItems(itemsTable itemsCounter[], int item_count);
 void recommendItems(int cart[], int cartSize, char items[][100],Map pairs);
 void displayCart(int cart[], int cartSize, char items[][100]);
@@ -83,6 +83,6 @@ void addToCart(int item, int cart[], int* cartSize,char items[][100]);
 void removeFromCart(int item, int cart[], int* cartSize,char items[][100]);
 void displayOrderTable(order table[], int row_count,char items[][100]);
 void displayMiningTable(miningTable miningCounter[], int miningCount, itemsTable itemsCounter[],char[][100]);
-void implementaionMenu(itemsTable itemsCounter[], order table[],miningTable miningCounter[], int item_count, int row_count, char items[][100]);
+void implementaionMenu(itemsTable itemsCounter[], order table[],miningTable miningCounter[], int item_count, int row_count, char items[][100],Map* pairs);
 int processFile(FILE *stream, itemsTable itemsCounter[], int *last_index);
 
