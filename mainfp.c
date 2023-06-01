@@ -9,7 +9,7 @@
 #define MAX_ITEM 10000
 #define MAX_CART_SIZE 10
 
-float minSupport = 0.05;
+float minSupport = 0.01;
 int SUPPORT = 0;
 char *nullChar = "\0";
 
@@ -22,8 +22,10 @@ int main()
                 exit(EXIT_FAILURE);
         }
         char items[100][100];
+       
         char ch;
         // char *data_item = (char *)malloc(1000 * sizeof(char));
+        Map pairs=initMap(500);
         int data_item;
         itemsTable itemsCounter[MAX_ITEM];
         miningTable miningCounter[MAX_ITEM];
@@ -48,20 +50,21 @@ int main()
         constructBaseFPtree(itemsCounter, table, row_count);
         copyToMiningTable(itemsCounter, miningCounter, last_index);
 
-        int prefix[1000];
+        int prefix[10000];
         prefix[0] = -1;
-        mineFPtree(itemsCounter, miningCounter, last_index, table, row_count, prefix);
+        mineFPtree(itemsCounter, miningCounter, last_index, table, row_count, prefix,items,pairs);
 
         //     printf("Last:%d",last_index);
         //     print_tree(itemsCounter,table, last_index,items);
         // printf("Items:\n");
-        // for (int i = 0; i < last_index; i++)
-        // {
-        //         printf("%s\n", items[i]);
-        // }
+        
         // int size=sizeof(table)
-        displayOrderTable(table, row_count, items);
-        displayMiningTable(miningCounter, last_index, itemsCounter, items);
+
+        for (int i = 0; i < 10; i++)
+        {
+                char *rec = get(&pairs, i);
+                printf("%d.%s  ", i + 1, rec);
+        }
 
         int choice;
         do
@@ -85,7 +88,7 @@ int main()
                         printf("\n");
                         break;
                 case 2:
-                        printTopItems(itemsCounter, last_index);
+                        displayTopItems(itemsCounter, last_index);
                         printf("\n");
                         break;
                 case 3:
@@ -107,7 +110,7 @@ int main()
                         printf("\n");
                         break;
                 case 6:
-                        // recommendItems(cart, cartSize, itemsCounter, last_index, items);
+                        recommendItems(cart, cartSize,items, pairs);
                         break;
                 case 7:
                 

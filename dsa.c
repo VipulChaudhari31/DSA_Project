@@ -31,6 +31,64 @@ void initialize_order(order *temp)
         temp->len = 0;
         temp->count = 0;
 }
+
+Map initMap(int capacity)
+{
+        Map map;
+        map.data = (KeyValuePair *)malloc(capacity * sizeof(KeyValuePair));
+        map.size = 0;
+        map.capacity = capacity;
+        return map;
+}
+
+// Function to insert a key-value pair into the map
+void insert(Map *map, int key, const char *value)
+{
+
+        // Check if the key already exists in the map
+        for (int i = 0; i < map->size; i++)
+        {
+                KeyValuePair *pair = &(map->data[i]);
+                if (pair->key == key)
+                {
+                        // Key already exists, concatenate the new value
+                        size_t newLength = strlen(pair->value) + strlen(value) + 3;
+                        char *newValue = (char *)malloc(newLength * sizeof(char));
+                        strcpy(newValue, pair->value);
+                        strcat(newValue, " , ");
+                        strcat(newValue, value);
+                        free(pair->value);
+                        pair->value = newValue;
+                        // printf("Inserted%s\n", pair->value);
+                        return;
+                }
+        }
+
+        // Key does not exist, create a new key-value pair
+        KeyValuePair *pair = &(map->data[map->size]);
+        pair->key = key;
+        pair->value = (char *)malloc((strlen(value) + 1) * sizeof(char));
+        strcpy(pair->value, value);
+        // printf("Inserted%s\n", pair->value);
+
+        map->size++;
+}
+
+char *get(Map *map, int key)
+{
+        for (int i = 0; i < map->size; i++)
+        {
+                KeyValuePair *pair = &(map->data[i]);
+                if (pair->key == key)
+                {
+                        return pair->value;
+                }
+        }
+
+        // Key not found
+        return NULL;
+}
+
 int find_index(int item, miningTable miningCounter[], int miningCount)
 {
         int i = -1;
@@ -392,7 +450,18 @@ void copyToMiningTable(itemsTable itemsCounter[], miningTable miningCounter[], i
         }
 }
 
-void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int old_miningCount, order old_table[], int old_row_count, int prefix[])
+int findItemIndex(char items[][100], char *item)
+{
+        for (int i = 0; i < 100; i++)
+        {
+                if (strcmp(items[i], item) == 0)
+                {
+                        return i;
+                }
+        }
+}
+
+void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int old_miningCount, order old_table[], int old_row_count, int prefix[], char items[][100], Map pairs)
 {
 
         // Recursive function for mining FP tree.
@@ -439,6 +508,16 @@ void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int 
 
                 // printf("Itemscounter:%s\n",itemsCounter[item].item);
                 // printf("Prefix_string:{%s}\n",prefix_string);
+                if (prefix_string[0] != '\0')
+                {
+                        char *token = strtok(prefix_string, ",");
+                        printf("%s  %s\n", token, itemsCounter[item].item);
+                        int itemIndex = findItemIndex(items, token);
+                        insert(&pairs, itemIndex, itemsCounter[item].item);
+                        // while(token!=NULL)
+                        // token=strtok(NULL,",");
+                        // insert(&pairs, itemIndex, token);
+                }
                 // printf("transaction:: {%s%s}:%d\n", prefix_string, itemsCounter[item].item, old_miningCounter[i].count);
                 // printf("transaction:: {%s}:%d\n", itemsCounter[item].item, old_miningCounter[i].count);
 
@@ -534,11 +613,11 @@ void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int 
                 }
                 constructFPtree(miningCounter, miningCount, table, row_count);
 
-                mineFPtree(itemsCounter, miningCounter, miningCount, table, row_count, new_prefix);
+                mineFPtree(itemsCounter, miningCounter, miningCount, table, row_count, new_prefix, items, pairs);
         }
 }
 
-void printTopItems(itemsTable itemsCounter[], int item_count)
+void displayTopItems(itemsTable itemsCounter[], int item_count)
 {
 
         // Sort the itemsCounter array in descending order based on count
@@ -553,35 +632,37 @@ void printTopItems(itemsTable itemsCounter[], int item_count)
                 {
                         printf("%s \n", itemsCounter[i].item);
                         count++;
-                        if (count == 10)
+                        if (count == 12)
                         {
                                 break;
+                        }
+                        if (count % 3 == 0)
+                        {
+                                printf("\n");
                         }
                 }
         }
 }
 
-// void recommendItems(char* cart[], int cartSize, itemsTable itemsCounter[], int last_index, char items[][100]) {
+void recommendItems(int cart[], int cartSize, char items[][100], Map pairs)
+{
 
-//     if (cartSize==0){
-//         printf("Cart is Empty");
-//     }
-//     // Iterate over the items in the cart
-//     for (int i = 0; i < cartSize; i++) {
-//         // Get the item index from itemsCounter
-//         // int itemIndex = findItemIndex(cart[i], itemsCounter, last_index);
-
-//         if (itemIndex != -1) {
-//             // Get the reference node of the item in the FP tree
-//             node* referenceNode = itemsCounter[itemIndex].reference;
-
-//             // Print the recommendations
-//             printf("Recommendations for %s: ", cart[i]);
-//             traverseChildNodes(referenceNode, itemsCounter, last_index,items);
-//             printf("\n");
-//         }
-//     }
-// }
+        if (cartSize == 0)
+        {
+                printf("\nYour cart is Empty\nTry our most selling products:\t  ");
+                for (int i = 0; i < 5; i++)
+                {
+                        printf("%s    ,", items[i]);
+                }
+                return;
+        }
+        // Iterate over the items in the cart
+        for (int i = 0; i < cartSize; i++)
+        {
+                char *rec = get(&pairs, cart[i]);
+                printf("%d.%s  ", i + 1, rec);
+        }
+}
 
 // void traverseChildNodes(node* parent, itemsTable itemsCounter[], int last_index, char items[][100]) {
 //     node* current = parent->child;
@@ -689,7 +770,7 @@ void displayMiningTable(miningTable miningCounter[], int miningCount, itemsTable
         }
 }
 
-void implementaionMenu(itemsTable itemsCounter[], order table[],miningTable miningCounter[], int item_count, int row_count, char items[][100])
+void implementaionMenu(itemsTable itemsCounter[], order table[], miningTable miningCounter[], int item_count, int row_count, char items[][100])
 {
         while (1)
         {
@@ -706,7 +787,7 @@ void implementaionMenu(itemsTable itemsCounter[], order table[],miningTable mini
                 {
                 case 1:
                         printf("Displaying FP Tree:\n");
-                        print_tree(itemsCounter,table, item_count,items);
+                        print_tree(itemsCounter, table, item_count, items);
                         break;
                 case 2:
                         printf("Displaying Order Table:\n");
