@@ -44,41 +44,40 @@ Map initMap(int capacity)
 // Function to insert a key-value pair into the map
 void insert(Map *map, int key, const char *value)
 {
-    // Check if the key already exists in the map
-    for (int i = 0; i < map->size; i++)
-    {
-        KeyValuePair *pair = &(map->data[i]);
-        if (pair->key == key)
+        // Check if the key already exists in the map
+        for (int i = 0; i < map->size; i++)
         {
-            // Key already exists, check if the new token is a substring of the old token
-            if (strstr(pair->value, value) != NULL)
-            {
-                // New token already exists in the old token, no need to concatenate
-                return;
-            }
+                KeyValuePair *pair = &(map->data[i]);
+                if (pair->key == key)
+                {
+                        // Key already exists, check if the new token is a substring of the old token
+                        if (strstr(pair->value, value) != NULL)
+                        {
+                                // New token already exists in the old token, no need to concatenate
+                                return;
+                        }
 
-            // Key already exists, concatenate the new value
-            size_t newLength = strlen(pair->value) + strlen(value) + 4;
-            char *newValue = (char *)malloc(newLength * sizeof(char));
-            strcpy(newValue, pair->value);
-            strcat(newValue, " , ");
-            strcat(newValue, value);
-            free(pair->value);
-            pair->value = newValue;
-        //     printf("Inserted: %s\n", pair->value);
-            return;
+                        // Key already exists, concatenate the new value
+                        size_t newLength = strlen(pair->value) + strlen(value) + 4;
+                        char *newValue = (char *)malloc(newLength * sizeof(char));
+                        strcpy(newValue, pair->value);
+                        strcat(newValue, " , ");
+                        strcat(newValue, value);
+                        free(pair->value);
+                        pair->value = newValue;
+                        //     printf("Inserted: %s\n", pair->value);
+                        return;
+                }
         }
-    }
 
-    // Key does not exist, create a new key-value pair
-    KeyValuePair *pair = &(map->data[map->size]);
-    pair->key = key;
-    pair->value = (char *)malloc((strlen(value) + 1) * sizeof(char));
-    strcpy(pair->value, value);
+        // Key does not exist, create a new key-value pair
+        KeyValuePair *pair = &(map->data[map->size]);
+        pair->key = key;
+        pair->value = (char *)malloc((strlen(value) + 1) * sizeof(char));
+        strcpy(pair->value, value);
 
-    map->size++;
+        map->size++;
 }
-
 
 char *get(Map *map, int key)
 {
@@ -467,7 +466,7 @@ int findItemIndex(char items[][100], char *item)
         }
 }
 
-void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int old_miningCount, order old_table[], int old_row_count, int prefix[], char items[][100], Map *pairs)
+void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int old_miningCount, order old_table[], int old_row_count, int prefix[], char items[][100], Map *pairs, int show)
 {
 
         // Recursive function for mining FP tree.
@@ -518,14 +517,11 @@ void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int 
                 if (prefix_string[0] != '\0')
                 {
                         char *token = strtok(prefix_string, ",");
-                        // printf("%s  %s\n", token, itemsCounter[item].item);
                         int itemIndex = findItemIndex(items, token);
-                        // printf("itemIndex:%d%s\n", itemIndex, items[item]);
                         insert(pairs, itemIndex, itemsCounter[item].item);
-                        // insert(&pairs, itemIndex, items[item]);
-                        // while(token!=NULL)
-                        // token=strtok(NULL,",");
-                        // insert(&pairs, itemIndex, token);
+                        if(show){
+                        printf("%s %s : %d\n", prefix_string, itemsCounter[item].item, old_miningCounter[i].count);
+                        }
                 }
                 // printf("transaction:: {%s%s}:%d\n", prefix_string, itemsCounter[item].item, old_miningCounter[i].count);
                 // printf("transaction:: {%s}:%d\n", itemsCounter[item].item, old_miningCounter[i].count);
@@ -622,7 +618,7 @@ void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int 
                 }
                 constructFPtree(miningCounter, miningCount, table, row_count);
 
-                mineFPtree(itemsCounter, miningCounter, miningCount, table, row_count, new_prefix, items, pairs);
+                mineFPtree(itemsCounter, miningCounter, miningCount, table, row_count, new_prefix, items, pairs, show);
         }
 }
 
@@ -669,8 +665,8 @@ void recommendItems(int cart[], int cartSize, char items[][100], Map pairs)
         for (int i = 0; i < cartSize; i++)
         {
                 char *rec = get(&pairs, cart[i]);
-                if(rec!=NULL)
-                printf("%d.%s=>  %s  \n",i+1,items[i],rec);
+                if (rec != NULL)
+                        printf("%d.%s=>  %s  \n", i + 1, items[i], rec);
         }
 }
 
@@ -757,7 +753,7 @@ void displayOrderTable(order table[], int row_count, char items[][100])
         for (int i = 0; i < row_count; ++i)
         {
                 printf("Row %d:\n", i + 1);
-                printf("Count: %d\n", table[i].count);
+                // printf("Count: %d\n", table[i].count);
                 printf("Items: ");
                 for (int j = 0; j < table[i].len; ++j)
                 {
@@ -781,7 +777,7 @@ void displayMiningTable(miningTable miningCounter[], int miningCount, itemsTable
         }
 }
 
-void implementaionMenu(itemsTable itemsCounter[], order table[], miningTable miningCounter[], int item_count, int row_count, char items[][100],Map* pairs)
+void implementaionMenu(itemsTable itemsCounter[], order table[], miningTable miningCounter[], int item_count, int row_count, char items[][100], Map *pairs)
 {
         while (1)
         {
@@ -790,8 +786,9 @@ void implementaionMenu(itemsTable itemsCounter[], order table[], miningTable min
                 printf("1. Display FP Tree\n");
                 printf("2. Display Order Table\n");
                 printf("3. Display Mining Table\n");
-                printf("4. Recommendation Map\n");
-                printf("5. Exit\n");
+                printf("4. Frequent Itemsets\n");
+                printf("5. Recommendation Map\n");
+                printf("0. Exit\n");
                 printf("Enter your option: ");
                 scanf("%d", &option);
 
@@ -810,6 +807,13 @@ void implementaionMenu(itemsTable itemsCounter[], order table[], miningTable min
                         displayMiningTable(miningCounter, item_count, itemsCounter, items);
                         break;
                 case 4:
+                        printf("Displaying Frequent Itemsets:\n");
+                        int prefix[10000];
+                        prefix[0] = -1;
+                        int last_index = 1000;
+                        mineFPtree(itemsCounter, miningCounter, last_index, table, row_count, prefix, items, pairs, 1);
+                        break;
+                case 5:
                         printf("Displaying Recommendation Map:\n");
                         for (int i = 0; i < 100; i++)
                         {
@@ -820,7 +824,8 @@ void implementaionMenu(itemsTable itemsCounter[], order table[], miningTable min
                                 }
                         }
                         break;
-                case 5:
+
+                case 0:
                         printf("\n");
                         return;
                 default:

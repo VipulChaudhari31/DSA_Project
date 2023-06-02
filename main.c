@@ -22,10 +22,10 @@ int main()
                 exit(EXIT_FAILURE);
         }
         char items[100][100];
-       
+
         char ch;
         // char *data_item = (char *)malloc(1000 * sizeof(char));
-        Map pairs=initMap(500);
+        Map pairs = initMap(500);
         int data_item;
         itemsTable itemsCounter[MAX_ITEM];
         miningTable miningCounter[MAX_ITEM];
@@ -52,14 +52,15 @@ int main()
 
         int prefix[10000];
         prefix[0] = -1;
-        mineFPtree(itemsCounter, miningCounter, last_index, table, row_count, prefix,items,&pairs);
+        mineFPtree(itemsCounter, miningCounter, last_index, table, row_count, prefix, items, &pairs);
 
         //     printf("Last:%d",last_index);
         //     print_tree(itemsCounter,table, last_index,items);
         // printf("Items:\n");
-        
+
         // int size=sizeof(table)
-        
+        char *welcome = "Welcome to the FP Growth Algorithm Implementation\n";
+        printf("\n%120s", welcome);
 
         int choice;
         do
@@ -105,13 +106,13 @@ int main()
                         printf("\n");
                         break;
                 case 6:
-                        recommendItems(cart, cartSize,items, pairs);
+                        recommendItems(cart, cartSize, items, pairs);
                         break;
                 case 7:
-                
-                        implementaionMenu(itemsCounter,table,miningCounter,last_index,row_count,items,&pairs);
+
+                        implementaionMenu(itemsCounter, table, miningCounter, last_index, row_count, items, &pairs);
                         printf("\n");
-                        break;             
+                        break;
 
                 case 0:
                         printf("Exiting...\n");
