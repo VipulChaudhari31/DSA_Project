@@ -52,7 +52,7 @@ int main()
 
         int prefix[10000];
         prefix[0] = -1;
-        mineFPtree(itemsCounter, miningCounter, last_index, table, row_count, prefix, items, &pairs);
+        mineFPtree(itemsCounter, miningCounter, last_index, table, row_count, prefix, items, &pairs,0);
 
         //     printf("Last:%d",last_index);
         //     print_tree(itemsCounter,table, last_index,items);
@@ -60,7 +60,7 @@ int main()
 
         // int size=sizeof(table)
         char *welcome = "Welcome to the FP Growth Algorithm Implementation\n";
-        printf("\n%120s", welcome);
+        printf("\n%s", welcome);
 
         int choice;
         do
