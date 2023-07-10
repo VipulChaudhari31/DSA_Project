@@ -520,7 +520,7 @@ void mineFPtree(itemsTable itemsCounter[], miningTable old_miningCounter[], int 
                         int itemIndex = findItemIndex(items, token);
                         insert(pairs, itemIndex, itemsCounter[item].item);
                         if(show){
-                        printf("%s %s : %d\n", prefix_string, itemsCounter[item].item, old_miningCounter[i].count);
+                        printf("%s, %s : %d\n", prefix_string, itemsCounter[item].item, old_miningCounter[i].count);
                         }
                 }
                 // printf("transaction:: {%s%s}:%d\n", prefix_string, itemsCounter[item].item, old_miningCounter[i].count);
@@ -700,7 +700,7 @@ void displayCart(int cart[], int cartSize, char items[][100])
         printf("SrNo. - Item \n");
         for (int i = 0; i < cartSize; i++)
         {
-                printf("%4d - %s\n", cart[i], items[cart[i]]);
+                printf("%4d - %s\n", cart[i]+1, items[cart[i]]);
         }
 }
 
